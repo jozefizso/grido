@@ -53,6 +53,9 @@ abstract class Filter extends \Grido\Base
     /** @var array */
     protected $columns = array();
 
+    /** @var string */
+    protected $sqlColumnName;
+
     /** @var mixed for ->where('<column> = %s', <value>)  */
     protected $condition = '= %s';
 
@@ -99,6 +102,17 @@ abstract class Filter extends \Grido\Base
     {
         $this->columns[$column] = $operator;
         return $this;
+    }
+
+    public function setSqlColumnName($name)
+    {
+        $this->sqlColumnName = $name;
+        return $this;
+    }
+
+    public function getSqlColumnName()
+    {
+        return isset($this->sqlColumnName) ? $this->sqlColumnName : "[$this->name]";
     }
 
     /**
@@ -262,7 +276,8 @@ abstract class Filter extends \Grido\Base
      */
     protected function _makeFilter($column, $value)
     {
-        return array("[$column] " . $this->condition, $this->formatValue($value));
+        $columnName = $this->getSqlColumnName();
+        return array("$columnName " . $this->condition, $this->formatValue($value));
     }
 
     /**

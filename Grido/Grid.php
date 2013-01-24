@@ -549,6 +549,12 @@ class Grid extends \Nette\Application\UI\Control
         $this->reload();
     }
 
+    public function handleResetFilter($filterName)
+    {
+        unset($this->filter[$filterName]);
+        $this->reload();
+    }
+
     /**
      * @internal
      * @param \Nette\Application\UI\Form $form

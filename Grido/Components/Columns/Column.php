@@ -46,6 +46,9 @@ abstract class Column extends \Grido\Base
     /** @var string */
     protected $column;
 
+    /** @var \Nette\Utils\Html <th> html tag */
+    protected $headerCellPrototype;
+
     /** @var \Nette\Utils\Html <td> html tag */
     protected $cellPrototype;
 
@@ -150,6 +153,16 @@ abstract class Column extends \Grido\Base
 
     /**********************************************************************************************/
 
+    public function getHeaderCellPrototype()
+    {
+        if (!$this->headerCellPrototype) {
+            $this->headerCellPrototype = \Nette\Utils\Html::el('th')
+                ->setClass(array('column'));
+        }
+
+        return $this->headerCellPrototype;
+    }
+
     /**
      * Returns cell prototype (<td> html tag).
      * @return \Nette\Utils\Html
@@ -192,6 +205,11 @@ abstract class Column extends \Grido\Base
         return $this->sort;
     }
 
+    public function getSortColumnClass()
+    {
+        return $this->getSort() ? ($this->getSort() == Column::DESC ? 'desc' : 'asc') : '';
+    }
+
     /**********************************************************************************************/
 
     /**
@@ -210,6 +228,11 @@ abstract class Column extends \Grido\Base
     public function hasFilter()
     {
         return $this->getForm()->getComponent(Filter::ID)->getComponent($this->name, FALSE);
+    }
+
+    public function hasActiveFilter()
+    {
+        return isset($this->grid->filter[$this->name]);
     }
 
     /**********************************************************************************************/

@@ -11,8 +11,8 @@
 {form form}
 
 {* TWITTER BOOTSTRAP *}
-{?$form['buttons']['search']->controlPrototype->class[] = 'btn search'}
-{?$form['buttons']['reset']->controlPrototype->class[] = 'btn reset'}
+{?$form['buttons']['search']->controlPrototype->class[] = 'btn btn-small search'}
+{?$form['buttons']['reset']->controlPrototype->class[] = 'btn btn-small reset'}
 
 <ul n:foreach="$form->errors as $error">
     <li>{$error}</li>
@@ -39,8 +39,12 @@
                         </li>
                     </ul>
                 </div>
-                {input search}
-                {input reset}
+                <div class="btn-group">
+                    <button n:input="search" title="Filtrovať"><i class="icon-filter"></i></button>
+                    {*<button n:input="reset" title="Zrušiť filter"><i class="icon-remove"></i></button>*}
+                </div>
+                {*input search*}
+                {*input reset*}
             {/formContainer}
         </div>
     </div>
@@ -52,20 +56,27 @@
             <th n:if="$control->hasOperations()" class="checker"{if $control->hasFilters()} rowspan="{if $control->filterRenderType == Grido\Filters\Filter::RENDER_OUTER}1{else}2{/if}"{/if}>
                 <input type="checkbox" title="{_'Invert'}">
             </th>
-            <th n:foreach="$control[Grido\Columns\Column::ID]->getComponents() as $column" class="column {=$column->getSort() ? ($column->getSort() == Grido\Columns\Column::DESC ? 'desc' : 'asc') : ''}">
-                {if $column->isSortable()}
-                    <div>
-                        <a n:if="!$column->getSort()" n:href="sort! [$column->getName() => Grido\Columns\Column::ASC]">{_$column->label}</a>
-                        <a n:if="$column->getSort() == Grido\Columns\Column::ASC" n:href="sort! [$column->getName() => Grido\Columns\Column::DESC]" class="sort">{_$column->label}</a>
-                        <a n:if="$column->getSort() == Grido\Columns\Column::DESC" n:href="sort! []" class="sort">{_$column->label}</a>
-                        <span></span>
-                    </div>
-                {else}
-                    {_$column->label}
-                {/if}
-            </th>
+            {foreach $control[Grido\Columns\Column::ID]->getComponents() as $column}
+                {?$th = $column->getHeaderCellPrototype()}
+                {?$th->class[] = $column->getSortColumnClass()}
+                {!$th->startTag()}
+                    {if $column->isSortable()}
+                        <div>
+                            <a n:if="!$column->getSort()" n:href="sort! [$column->getName() => Grido\Columns\Column::ASC]">{_$column->label}</a>
+                            <a n:if="$column->getSort() == Grido\Columns\Column::ASC" n:href="sort! [$column->getName() => Grido\Columns\Column::DESC]" class="sort">{_$column->label}</a>
+                            <a n:if="$column->getSort() == Grido\Columns\Column::DESC" n:href="sort! []" class="sort">{_$column->label}</a>
+                            <span></span>
+                        </div>
+                    {else}
+                        {_$column->label}
+                        {if $column->hasActiveFilter()}
+                            <a n:href="resetFilter! $column->name" title="Zrušiť filter"><i class="icon-filter text-success pull-right"></i></a>
+                        {/if}
+                    {/if}
+                {!$th->endTag}
+            {/foreach}
             <th class="actions center" n:if="$control->hasActions()">
-                {_'Actions'}
+                {*_'Actions'*}
             </th>
         </tr>
         <tr n:if="$control->filterRenderType == Grido\Filters\Filter::RENDER_INNER && $control->hasFilters()" class="filter inner">
@@ -91,8 +102,12 @@
                             </li>
                         </ul>
                     </div>
-                    {input search}
-                    {input reset}
+                    <div class="btn-group">
+                        <button n:input="search" title="Filtrovať"><i class="icon-filter"></i> Filtrovať</button>
+                        <button n:input="reset" rel="tooltip" title="Zrušiť filter"><i class="icon-remove"></i></button>
+                    </div>
+                    {*input search*}
+                    {*input reset*}
                 {/formContainer}
             </th>
         </tr>
@@ -163,7 +178,25 @@
                 </td>
             {!$tr->endTag()}
         {/foreach}
-        <tr n:if="!$data"><td colspan="{$columnCount + 1}" class="no-results">{_'No results.'}</td></tr>
+        <tr n:if="$control->count == 0">
+            <td colspan="{$columnCount + 1}" class="no-results">
+                {if !$control->hasFilters()}
+                    {_'No results.'}
+                {else}
+                    <div class="media" style="margin: 0 auto; width: 20%">
+                        <span class="pull-left">
+                            <i class="icon-filter icon-4x"></i>
+                        </span>
+                        <div class="media-body" style="text-align: left">
+                            <b>{_'No results.'}</b>
+                            {formContainer buttons}
+                                <p><button n:input="reset"><i class="icon-remove"></i> Zrušiť filter</button></p>
+                            {/formContainer}
+                        </div>
+                    </div>
+                {/if}
+            </td>
+        </tr>
     </tbody>
 </table>
 {/form}
